@@ -198,6 +198,11 @@ chatForm.addEventListener('submit', async function(e) {
         // 4. Update News Sidebar
         updateNewsFeed(data.news || []);
         
+        // 5. Update Interactive Dashboard
+        if (data.payload) {
+            updateDashboard(data.payload);
+        }
+        
     } catch (err) {
         console.error('API call failed: ', err);
         appendMessage('assistant', '⚠️ **Error:** Unable to connect to the StockVibe AI Backend. Please ensure the server is running on localhost and try again.');
@@ -218,4 +223,197 @@ clearChatBtn.addEventListener('click', () => {
     `;
     chatHistory = [];
     updateNewsFeed([]);
+    
+    // Reset dashboard panel to welcome standby state
+    dashboardTickerTitle.textContent = "QUANTITATIVE WORKSPACE";
+    dashboardStateBadge.textContent = "STANDBY";
+    dashboardWelcome.classList.remove('hidden');
+    dashboardActive.classList.add('hidden');
+    const container = document.getElementById('tradingview-chart-container');
+    if (container) container.innerHTML = '';
 });
+
+// Cache DOM elements for dashboard
+const dashboardPanel = document.getElementById('dashboard-panel');
+const chatPanel = document.getElementById('chat-panel');
+const buzzPanel = document.getElementById('buzz-panel');
+
+const dashboardWelcome = document.getElementById('dashboard-welcome');
+const dashboardActive = document.getElementById('dashboard-active');
+const dashboardTickerTitle = document.getElementById('dashboard-ticker-title');
+const dashboardStateBadge = document.getElementById('dashboard-state-badge');
+
+const predTakeProfit = document.getElementById('pred-take-profit');
+const predCurrentPrice = document.getElementById('pred-current-price');
+const predStopLoss = document.getElementById('pred-stop-loss');
+const predRangeProgress = document.getElementById('pred-range-progress');
+const rangeCurrentMarker = document.getElementById('range-current-marker');
+const predVerdict = document.getElementById('pred-verdict');
+const predConfidence = document.getElementById('pred-confidence');
+
+const techRegime = document.getElementById('tech-regime');
+const techRsi = document.getElementById('tech-rsi');
+const techMacd = document.getElementById('tech-macd');
+const techEma = document.getElementById('tech-ema');
+
+const fundPe = document.getElementById('fund-pe');
+const fundRoe = document.getElementById('fund-roe');
+const fundDe = document.getElementById('fund-de');
+const fundDiv = document.getElementById('fund-div');
+
+// Quick-links watchlist buttons
+document.querySelectorAll('.quick-stock-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const ticker = btn.getAttribute('data-ticker');
+        chatInput.value = `Analyze ${ticker}`;
+        chatForm.dispatchEvent(new Event('submit'));
+        // On mobile, switch to chat panel so user can see it processing
+        switchTab('chat');
+    });
+});
+
+// Mobile Tabs Switching logic
+const tabChatBtn = document.getElementById('tab-chat-btn');
+const tabDashboardBtn = document.getElementById('tab-dashboard-btn');
+const tabNewsBtn = document.getElementById('tab-news-btn');
+
+function switchTab(activeTab) {
+    // Remove active classes
+    tabChatBtn.classList.remove('active');
+    tabDashboardBtn.classList.remove('active');
+    tabNewsBtn.classList.remove('active');
+    
+    chatPanel.classList.add('mobile-hidden');
+    dashboardPanel.classList.add('mobile-hidden');
+    buzzPanel.classList.add('mobile-hidden');
+    
+    if (activeTab === 'chat') {
+        tabChatBtn.classList.add('active');
+        chatPanel.classList.remove('mobile-hidden');
+    } else if (activeTab === 'dashboard') {
+        tabDashboardBtn.classList.add('active');
+        dashboardPanel.classList.remove('mobile-hidden');
+        // Re-trigger TradingView resize
+        const tvIframe = document.querySelector('#tradingview-chart-container iframe');
+        if (tvIframe) {
+            tvIframe.style.width = '99%';
+            setTimeout(() => tvIframe.style.width = '100%', 50);
+        }
+    } else if (activeTab === 'news') {
+        tabNewsBtn.classList.add('active');
+        buzzPanel.classList.remove('mobile-hidden');
+    }
+}
+
+tabChatBtn.addEventListener('click', () => switchTab('chat'));
+tabDashboardBtn.addEventListener('click', () => switchTab('dashboard'));
+tabNewsBtn.addEventListener('click', () => switchTab('news'));
+
+// TradingView Widget Loader
+function loadTradingViewChart(symbol) {
+    const container = document.getElementById('tradingview-chart-container');
+    container.innerHTML = '';
+    
+    let cleanSymbol = symbol;
+    if (symbol.endsWith('.NS')) {
+        cleanSymbol = "NSE:" + symbol.slice(0, -3);
+    } else if (symbol.endsWith('.BO')) {
+        cleanSymbol = "BSE:" + symbol.slice(0, -3);
+    }
+    
+    if (window.TradingView) {
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": cleanSymbol,
+            "interval": "D",
+            "timezone": "Asia/Kolkata",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "enable_publishing": false,
+            "hide_side_toolbar": true,
+            "allow_symbol_change": false,
+            "container_id": "tradingview-chart-container"
+        });
+    }
+}
+
+// Dashboard Updater
+function updateDashboard(payload) {
+    if (!payload) return;
+    
+    // Change state and ticker
+    dashboardTickerTitle.textContent = `${payload.company_name} (${payload.ticker})`;
+    dashboardStateBadge.textContent = "LIVE DATA";
+    
+    // Pricing
+    const price = payload.current_price;
+    const sl = payload.risk_map.stop_loss;
+    const tp = payload.risk_map.take_profit;
+    
+    predCurrentPrice.textContent = `₹${price.toFixed(2)}`;
+    predStopLoss.textContent = `₹${sl.toFixed(2)}`;
+    predTakeProfit.textContent = `₹${tp.toFixed(2)}`;
+    
+    // Progress calculation for price range marker
+    let progressPct = ((price - sl) / (tp - sl)) * 100;
+    progressPct = Math.max(0, Math.min(100, progressPct));
+    predRangeProgress.style.width = `${progressPct}%`;
+    rangeCurrentMarker.style.left = `${progressPct}%`;
+    
+    // Determine simple verdict/confidence based on indicators
+    let verdict = "HOLD";
+    let confidence = 65;
+    const rsi = payload.technicals.rsi;
+    const emaCross = payload.technicals.moving_averages.cross;
+    
+    if (rsi < 40 && emaCross === "GOLDEN CROSS") {
+        verdict = "STRONG BUY";
+        confidence = 85;
+        predVerdict.style.color = "var(--accent-green)";
+    } else if (rsi > 70 && emaCross === "DEATH CROSS") {
+        verdict = "STRONG SELL";
+        confidence = 80;
+        predVerdict.style.color = "#ff5555";
+    } else if (rsi < 45) {
+        verdict = "ACCUMULATE";
+        confidence = 72;
+        predVerdict.style.color = "#80ffd4";
+    } else if (rsi > 65) {
+        verdict = "REDUCE";
+        confidence = 70;
+        predVerdict.style.color = "#ff8080";
+    } else {
+        verdict = "HOLD / NEUTRAL";
+        confidence = 65;
+        predVerdict.style.color = "var(--text-main)";
+    }
+    
+    predVerdict.textContent = verdict;
+    predConfidence.textContent = `${confidence}%`;
+    
+    // Technicals Section
+    techRegime.textContent = payload.technicals.adx.regime;
+    techRsi.textContent = rsi.toFixed(1);
+    techMacd.textContent = payload.technicals.macd.crossover;
+    techEma.textContent = `${payload.technicals.moving_averages.cross} (EMA50/200)`;
+    
+    // Fundamentals Section
+    const f = payload.fundamentals;
+    fundPe.textContent = f.pe_ratio;
+    fundRoe.textContent = f.roe;
+    fundDe.textContent = f.de_ratio;
+    fundDiv.textContent = f.dividend_yield;
+    
+    // Toggle panels
+    dashboardWelcome.classList.add('hidden');
+    dashboardActive.classList.remove('hidden');
+    
+    // Load TradingView
+    loadTradingViewChart(payload.ticker);
+    
+    // On mobile, automatically show the dashboard/workspace tab when data arrives
+    if (window.innerWidth <= 900) {
+        switchTab('dashboard');
+    }
+}

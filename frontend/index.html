@@ -19,6 +19,9 @@
     <!-- External Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    
     <!-- CSS stylesheet link -->
     <link rel="stylesheet" href="/styles.css">
 </head>
@@ -41,8 +44,15 @@
 
         <!-- Main Workspace Layout -->
         <div class="app-layout">
+            <!-- Mobile Tabs Navigation -->
+            <div class="mobile-tabs-nav">
+                <button class="tab-btn active" id="tab-chat-btn">💬 AI Analyst</button>
+                <button class="tab-btn" id="tab-dashboard-btn">📊 Workspace</button>
+                <button class="tab-btn" id="tab-news-btn">📰 News</button>
+            </div>
+
             <!-- Left Panel: Conversational AI Analyst -->
-            <main class="chat-panel">
+            <main class="chat-panel" id="chat-panel">
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="panel-icon">⚡</span>
@@ -84,8 +94,121 @@
                 </form>
             </main>
 
+            <!-- Center Panel: Interactive Technical Workspace & Predictions -->
+            <section class="dashboard-panel mobile-hidden" id="dashboard-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-icon">📊</span>
+                        <h2 id="dashboard-ticker-title">QUANTITATIVE WORKSPACE</h2>
+                    </div>
+                    <div class="dashboard-badge" id="dashboard-state-badge">STANDBY</div>
+                </div>
+
+                <!-- Standby / Welcome state -->
+                <div class="dashboard-content standby" id="dashboard-welcome">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">🎯</div>
+                        <h3>AI Market Terminal & Prediction Engine</h3>
+                        <p>Select a stock below or query any ticker in the chat to launch the real-time chart, quantitative diagnostics, and price predictions.</p>
+                        
+                        <div class="quick-links-grid">
+                            <button type="button" class="quick-stock-btn" data-ticker="COALINDIA.NS">🔥 COAL INDIA</button>
+                            <button type="button" class="quick-stock-btn" data-ticker="RELIANCE.NS">💎 RELIANCE</button>
+                            <button type="button" class="quick-stock-btn" data-ticker="TCS.NS">⚡ TCS</button>
+                            <button type="button" class="quick-stock-btn" data-ticker="SBIN.NS">🏦 SBI</button>
+                            <button type="button" class="quick-stock-btn" data-ticker="INFY.NS">💻 INFOSYS</button>
+                            <button type="button" class="quick-stock-btn" data-ticker="TATAMOTORS.NS">🚗 TATA MOTORS</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Dashboard layout -->
+                <div class="dashboard-content active-dashboard hidden" id="dashboard-active">
+                    <!-- TradingView Chart Container -->
+                    <div class="chart-wrapper">
+                        <div id="tradingview-chart-container" class="tradingview-chart"></div>
+                    </div>
+
+                    <!-- Predictions & Volatility-Scaled Targets Card -->
+                    <div class="prediction-card glass-card">
+                        <div class="card-section-title">🔮 QUANT PREDICTIONS (5-DAY TARGETS)</div>
+                        <div class="prediction-grid">
+                            <div class="pred-metric">
+                                <span class="pred-label">Take Profit Target</span>
+                                <span class="pred-value target-up" id="pred-take-profit">₹0.00</span>
+                            </div>
+                            <div class="pred-metric">
+                                <span class="pred-label">Current Close</span>
+                                <span class="pred-value" id="pred-current-price">₹0.00</span>
+                            </div>
+                            <div class="pred-metric">
+                                <span class="pred-label">Stop Loss Level</span>
+                                <span class="pred-value target-down" id="pred-stop-loss">₹0.00</span>
+                            </div>
+                        </div>
+                        <div class="pred-range-bar">
+                            <div class="range-progress" id="pred-range-progress" style="width: 50%;"></div>
+                            <span class="range-marker stop-loss-marker">SL</span>
+                            <span class="range-marker current-marker" id="range-current-marker" style="left: 50%;">▲</span>
+                            <span class="range-marker target-marker">TP</span>
+                        </div>
+                        <div class="verdict-bar">
+                            <span class="verdict-label">Verdict:</span>
+                            <span class="verdict-value" id="pred-verdict">HOLD</span>
+                            <span class="confidence-label">Confidence:</span>
+                            <span class="confidence-value" id="pred-confidence">65%</span>
+                        </div>
+                    </div>
+
+                    <!-- Technicals Indicator Gauges Grid -->
+                    <div class="indicator-grid-row">
+                        <!-- Technicals Summary -->
+                        <div class="indicator-card glass-card">
+                            <div class="card-section-title">📐 Technical Summary</div>
+                            <div class="indicator-row">
+                                <span>Regime:</span>
+                                <strong id="tech-regime">N/A</strong>
+                            </div>
+                            <div class="indicator-row">
+                                <span>RSI (14-day):</span>
+                                <strong id="tech-rsi">0.0</strong>
+                            </div>
+                            <div class="indicator-row">
+                                <span>MACD Cross:</span>
+                                <strong id="tech-macd">N/A</strong>
+                            </div>
+                            <div class="indicator-row">
+                                <span>EMA Cross:</span>
+                                <strong id="tech-ema">N/A</strong>
+                            </div>
+                        </div>
+
+                        <!-- Fundamentals Summary -->
+                        <div class="indicator-card glass-card">
+                            <div class="card-section-title">🏦 Fundamental Health</div>
+                            <div class="indicator-row">
+                                <span>P/E Ratio:</span>
+                                <strong id="fund-pe">N/A</strong>
+                            </div>
+                            <div class="indicator-row">
+                                <span>Return on Equity:</span>
+                                <strong id="fund-roe">N/A</strong>
+                            </div>
+                            <div class="indicator-row">
+                                <span>D/E Ratio:</span>
+                                <strong id="fund-de">N/A</strong>
+                            </div>
+                            <div class="indicator-row">
+                                <span>Dividend Yield:</span>
+                                <strong id="fund-div">0.00%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Right Panel: Portfolio Buzz Sidebar -->
-            <aside class="buzz-panel">
+            <aside class="buzz-panel mobile-hidden" id="buzz-panel">
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="panel-icon">📰</span>

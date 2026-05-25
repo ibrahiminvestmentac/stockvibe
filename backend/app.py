@@ -92,7 +92,8 @@ def chat():
                 return jsonify({
                     "response": report,
                     "ticker": ticker,
-                    "news": payload.get('news', [])
+                    "news": payload.get('news', []),
+                    "payload": payload
                 })
             else:
                 # Fallback if yfinance failed or returned empty
@@ -104,7 +105,8 @@ def chat():
                 return jsonify({
                     "response": fallback_msg,
                     "ticker": ticker,
-                    "news": []
+                    "news": [],
+                    "payload": None
                 })
         else:
             # 4. General conversational chat
@@ -120,7 +122,8 @@ def chat():
             return jsonify({
                 "response": advisor_reply,
                 "ticker": None,
-                "news": []
+                "news": [],
+                "payload": None
             })
             
     except Exception as e:
