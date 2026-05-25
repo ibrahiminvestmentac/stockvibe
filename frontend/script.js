@@ -196,9 +196,7 @@ chatForm.addEventListener('submit', async function(e) {
         chatHistory.push({ role: 'assistant', content: data.response });
         
         // 4. Update News Sidebar
-        if (data.news && data.news.length > 0) {
-            updateNewsFeed(data.news);
-        }
+        updateNewsFeed(data.news || []);
         
     } catch (err) {
         console.error('API call failed: ', err);
