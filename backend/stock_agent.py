@@ -471,7 +471,9 @@ def run_quantitative_analysis(ticker):
         if roe != 'N/A' and isinstance(roe, (int, float)):
             roe = f"{roe * 100:.2f}%"
         if dividend_yield != 'N/A' and isinstance(dividend_yield, (int, float)):
-            dividend_yield = f"{dividend_yield * 100:.2f}%"
+            if dividend_yield < 0.15:
+                dividend_yield = dividend_yield * 100
+            dividend_yield = f"{dividend_yield:.2f}%"
         if market_cap and isinstance(market_cap, (int, float)):
             if market_cap >= 1e12:
                 market_cap_str = f"₹{market_cap / 1e12:.2f}T"
