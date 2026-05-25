@@ -1,0 +1,11 @@
+flask
+flask-cors
+groq
+yfinance
+python-dotenv
+pandas
+numpy
+requests
+lxml
+python-dateutil
+gunicorn

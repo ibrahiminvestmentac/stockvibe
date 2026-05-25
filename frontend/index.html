@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockVibe AI // Institutional Stock Analysis Terminal</title>
+    
+    <!-- Meta tags for PWA and SEO -->
+    <meta name="description" content="Institutional-grade real-time stock technical, fundamental, sentiment, and risk analysis terminal powered by StockVibe AI.">
+    <meta name="theme-color" content="#08090a">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- External Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- CSS stylesheet link -->
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Terminal Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="terminal-badge">SECURE TERMINAL</div>
+                <h1 class="logo-text">STOCKVIBE <span class="logo-accent">AI</span> <span class="terminal-ver">// v2.8.5</span></h1>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="status-dot pulsing"></span>
+                    <span class="status-label">QUANT ENGINE ONLINE</span>
+                </div>
+                <div class="clock-display" id="clock">16:17:08</div>
+            </div>
+        </header>
+
+        <!-- Main Workspace Layout -->
+        <div class="app-layout">
+            <!-- Left Panel: Conversational AI Analyst -->
+            <main class="chat-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-icon">⚡</span>
+                        <h2>AI QUANT ANALYST</h2>
+                    </div>
+                    <div class="panel-actions">
+                        <button id="clear-chat-btn" title="Reset Session" class="control-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
+                            RESET
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat History Scroll Container -->
+                <div class="messages-container" id="chat-messages">
+                    <div class="message system-message">
+                        <div class="message-content">
+                            <span class="system-tag">SYSTEM INITIALIZED</span>
+                            <p>Welcome to <strong>StockVibe Elite Institutional Terminal</strong>. Enter a stock name or ticker (e.g. <code>TCS</code>, <code>RELIANCE</code>, <code>COAL INDIA</code>, <code>INFY</code>) to launch real-time mathematical valuation, momentum technicals, Google News sentiment scoring, and risk boundaries.</p>
+                        </div>
+                    </div>
+                    <!-- Messages dynamically injected here -->
+                </div>
+
+                <!-- User Entry Controller -->
+                <form class="input-area" id="chat-form">
+                    <textarea 
+                        id="chat-input" 
+                        placeholder="Request institutional analysis on a ticker, or chat generally (e.g., 'Analyze Reliance Industries' or 'What is Bollinger Band Width?')..." 
+                        rows="1" 
+                        required
+                    ></textarea>
+                    <button type="submit" id="send-btn" class="send-btn" aria-label="Send query">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </form>
+            </main>
+
+            <!-- Right Panel: Portfolio Buzz Sidebar -->
+            <aside class="buzz-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-icon">📰</span>
+                        <h2>PORTFOLIO BUZZ</h2>
+                    </div>
+                    <span class="feed-badge">LIVE RSS FEED</span>
+                </div>
+                
+                <!-- Live News Feed Container -->
+                <div class="news-container" id="news-feed">
+                    <div class="empty-news-state">
+                        <p>No active ticker analysis running.</p>
+                        <span>Crawl details will populate once a stock query executes.</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Script loading -->
+    <script src="/script.js"></script>
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('ServiceWorker registration successful with scope: ', reg.scope))
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
+</body>
+</html>
