@@ -16,6 +16,36 @@ def index():
     """Serves the main application landing page."""
     return app.send_static_file('index.html')
 
+@app.route('/api/debug', methods=['GET'])
+def debug():
+    ticker = request.args.get('ticker', 'TCS.NS')
+    try:
+        import yfinance as yf
+        import requests
+        session = requests.Session()
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        })
+        stock = yf.Ticker(ticker, session=session)
+        df = stock.history(period="2y")
+        info = stock.info if stock.info else {}
+        return jsonify({
+            "status": "success",
+            "ticker": ticker,
+            "df_empty": df.empty,
+            "df_rows": len(df) if not df.empty else 0,
+            "df_columns": list(df.columns) if not df.empty else [],
+            "info_keys": list(info.keys()) if info else [],
+            "info_name": info.get('longName') if info else None
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     """
