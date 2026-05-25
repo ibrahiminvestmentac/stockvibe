@@ -64,6 +64,14 @@ def chat():
         else:
             # 4. General conversational chat
             advisor_reply = generate_general_advisor_reply(message, history)
+            if advisor_reply == "NONE" or not advisor_reply:
+                advisor_reply = (
+                    "Welcome to **StockVibe Elite Terminal**. I was unable to connect to the AI model "
+                    "(please verify that a valid Gemini/Groq API key is configured in your `.env` file).\n\n"
+                    "However, you can still type any stock ticker or company name (e.g., **TCS**, **RELIANCE**, **COAL INDIA**) "
+                    "to trigger our fully local quantitative engine. It will compute Technical Indicators, Fibonacci Levels, "
+                    "Bollinger Bands, Volatility-Scaled Risk Parameters, and scrape real-time headlines with lexicon-based sentiment analysis!"
+                )
             return jsonify({
                 "response": advisor_reply,
                 "ticker": None,
@@ -81,4 +89,4 @@ if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     debug_mode = os.environ.get("FLASK_ENV") == "development"
     print(f"Starting StockVibe AI Backend Terminal on http://127.0.0.1:{port} (static: {app.static_folder})")
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    app.run(host='0.0.0.0', port=port, debug=debug_mode, use_reloader=False)
