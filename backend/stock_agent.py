@@ -136,7 +136,7 @@ def call_llm(system_prompt, user_prompt, temperature=0.1):
                     "temperature": temperature
                 }
             }
-            res = requests.post(url, headers=headers, json=payload, timeout=10)
+            res = requests.post(url, headers=headers, json=payload, timeout=30)
             if res.status_code == 200:
                 data = res.json()
                 return data['candidates'][0]['content']['parts'][0]['text'].strip()
