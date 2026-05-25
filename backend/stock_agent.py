@@ -452,7 +452,13 @@ def run_quantitative_analysis(ticker):
         price_change_pct = float(((current_price - prev_price) / prev_price) * 100)
         
         # Fundamentals info
-        info = stock.info if stock.info else {}
+        try:
+            info = stock.info
+            if not info:
+                info = {}
+        except Exception as info_err:
+            print(f"[stock_agent] Warning: Failed to fetch stock.info: {info_err}")
+            info = {}
         
         # Extract fundamentals
         market_cap = info.get('marketCap', 0)

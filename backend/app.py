@@ -28,7 +28,13 @@ def debug():
         })
         stock = yf.Ticker(ticker, session=session)
         df = stock.history(period="2y")
-        info = stock.info if stock.info else {}
+        try:
+            info = stock.info
+            if not info:
+                info = {}
+        except Exception as info_err:
+            print(f"[app] Warning: Failed to fetch stock.info in debug: {info_err}")
+            info = {}
         return jsonify({
             "status": "success",
             "ticker": ticker,
