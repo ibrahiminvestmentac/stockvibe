@@ -28,6 +28,12 @@ def debug():
         })
         stock = yf.Ticker(ticker, session=session)
         df = yf.download(ticker, period="2y", session=session)
+        chart_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=2y&interval=1d"
+        chart_res = session.get(chart_url)
+        chart_status = chart_res.status_code
+        chart_data = chart_res.json() if chart_status == 200 else {}
+        chart_has_result = "chart" in chart_data and chart_data["chart"]["result"] is not None
+        
         try:
             info = stock.info
             if not info:
@@ -40,7 +46,8 @@ def debug():
             "ticker": ticker,
             "df_empty": df.empty,
             "df_rows": len(df) if not df.empty else 0,
-            "df_columns": list(df.columns) if not df.empty else [],
+            "chart_status": chart_status,
+            "chart_has_result": chart_has_result,
             "info_keys": list(info.keys()) if info else [],
             "info_name": info.get('longName') if info else None
         })
