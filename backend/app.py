@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from stock_agent import discover_ticker, run_quantitative_analysis, generate_institutional_report, generate_general_advisor_reply
+from stock_agent import discover_ticker, run_quantitative_analysis, generate_institutional_report, generate_general_advisor_reply, fetch_history_via_chart_api
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +28,8 @@ def debug():
         })
         stock = yf.Ticker(ticker, session=session)
         df = yf.download(ticker, period="2y", session=session)
+        if df.empty:
+            df = fetch_history_via_chart_api(ticker, session=session)
         chart_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=2y&interval=1d"
         chart_res = session.get(chart_url)
         chart_status = chart_res.status_code

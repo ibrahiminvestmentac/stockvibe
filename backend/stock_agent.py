@@ -425,6 +425,51 @@ def analyze_headline_sentiment(headline):
     
     return 0.0
 
+def fetch_history_via_chart_api(ticker, session=None):
+    """
+    Directly queries Yahoo Finance chart JSON API.
+    Bypasses standard yfinance crumb rate-limit blocks on servers.
+    """
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=2y&interval=1d"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    try:
+        if session:
+            res = session.get(url, headers=headers, timeout=10)
+        else:
+            res = requests.get(url, headers=headers, timeout=10)
+            
+        if res.status_code != 200:
+            return pd.DataFrame()
+            
+        data = res.json()
+        result = data.get("chart", {}).get("result", [])
+        if not result:
+            return pd.DataFrame()
+            
+        result_data = result[0]
+        timestamps = result_data.get("timestamp", [])
+        quote = result_data.get("indicators", {}).get("quote", [{}])[0]
+        adjclose = result_data.get("indicators", {}).get("adjclose", [{}])[0].get("adjclose", [])
+        
+        # Build pandas DataFrame
+        dt_index = pd.to_datetime(timestamps, unit="s")
+        
+        df = pd.DataFrame({
+            "Open": quote.get("open", []),
+            "High": quote.get("high", []),
+            "Low": quote.get("low", []),
+            "Close": adjclose if adjclose else quote.get("close", []),
+            "Volume": quote.get("volume", [])
+        }, index=dt_index)
+        
+        df = df.dropna(subset=["Close"])
+        return df
+    except Exception as e:
+        print(f"[stock_agent] Chart API fallback failed: {e}")
+        return pd.DataFrame()
+
 def run_quantitative_analysis(ticker):
     """
     Fetches stock details from yfinance and calculates technical indicators.
@@ -439,7 +484,16 @@ def run_quantitative_analysis(ticker):
         stock = yf.Ticker(ticker, session=session)
         
         # 2 years of daily data
-        df = stock.history(period="2y")
+        try:
+            df = stock.history(period="2y")
+        except Exception as hist_err:
+            print(f"[stock_agent] Warning: stock.history failed: {hist_err}. Trying direct chart API fallback...")
+            df = pd.DataFrame()
+            
+        if df.empty:
+            print("[stock_agent] yfinance history was empty. Trying direct chart API fallback...")
+            df = fetch_history_via_chart_api(ticker, session=session)
+            
         if df.empty:
             return None
             
