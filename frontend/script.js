@@ -172,7 +172,8 @@ chatForm.addEventListener('submit', async function(e) {
     
     try {
         // Make endpoint call
-        const response = await fetch('/api/chat', {
+        const baseUrl = window.location.protocol === 'file:' ? 'http://127.0.0.1:8080' : '';
+        const response = await fetch(`${baseUrl}/api/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

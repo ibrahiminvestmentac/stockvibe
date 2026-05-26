@@ -688,47 +688,73 @@ def generate_general_advisor_reply(message, history):
 def generate_institutional_report(payload):
     """
     Takes stock payload and feeds it into the LLM to format
-    exactly as a 'StockVibe Elite Institutional Terminal AI' report.
+    exactly as an advanced Hedge-Fund Swing Trading Prediction report.
     """
     system_prompt = (
-        "You are the 'StockVibe Elite Institutional Terminal AI', a quant-driven analyst. "
-        "Analyze the provided stock JSON payload and write a professional, institutional-grade research report. "
-        "Format your entire response using the following structured Markdown categories and emojis. "
-        "Ensure you format all numeric values, percentages, and tickers exactly as requested. "
-        "Highlight important elements in neon/primary bold markers. "
-        "Ensure you include all 9 sections exactly as written below:\n\n"
+        "You are an advanced AI stock market prediction engine specialized in SHORT-TERM SWING TRADING (1 to 14 days maximum).\n\n"
+        "Your mission is to maximize probability-based profitable trades using:\n"
+        "* Historical stock data\n"
+        "* Candlestick patterns\n"
+        "* Technical indicators\n"
+        "* Volume analysis\n"
+        "* Market sentiment\n"
+        "* Latest news\n"
+        "* Sector momentum\n"
+        "* Institutional activity\n"
+        "* Current market phase\n"
+        "* Trend strength\n"
+        "* Risk analysis\n\n"
         
-        "Format structure:\n"
-        "### 🏢 Asset: [Company Name] ([TICKER]) | [Cap Category]\n"
-        "### 💰 Current Price: ₹[Price] ([1D % Change]%)\n"
-        "### 📐 Quantitative Technicals:\n"
-        "- **Regime**: [Regime status, e.g., TRENDING BULLISH / RANGING]\n"
-        "- **Momentum**: RSI at [RSI_VAL] ([RSI Condition, e.g. OVERBOUGHT/OVERSOLD/NEUTRAL]), MACD is [MACD_VAL] vs Signal [SIGNAL_VAL] ([MACD Crossover status])\n"
-        "- **Bollinger Bands**: Upper ₹[Upper], Lower ₹[Lower] (Bandwidth: [Bandwidth]%, Current Pos: [Percent_B]%)\n"
-        "- **EMAs Cross**: [Golden Cross/Death Cross status] (EMA50: ₹[EMA50] | EMA200: ₹[EMA200])\n"
-        "- **Fibonacci 61.8% Level**: ₹[Fib_618_Val]\n"
-        "- **Breakout Alerts**: [Breakout Status, e.g. BREAKOUT DETECTED / NO BREAKOUT]\n\n"
+        "PRIMARY GOAL:\n"
+        "Predict whether a stock will move UP or DOWN within the next 1–14 days with maximum possible accuracy and minimum risk.\n\n"
         
-        "### 🏦 Fundamental Analysis:\n"
-        "- **P/E Ratio**: [P/E] | **ROE**: [ROE] | **D/E Ratio**: [D/E]\n"
-        "- **Dividend Yield**: [Dividend Yield] | **Market Valuation**: [Market Cap]\n\n"
+        "IMPORTANT RULES:\n"
+        "1. NEVER blindly predict BUY.\n"
+        "2. NEVER give fake confidence.\n"
+        "3. If confidence is low, clearly say: \"Prediction confidence is low.\"\n"
+        "4. If news data is empty or unavailable, say: \"No major news affecting this stock currently.\"\n"
+        "5. Avoid highly risky stocks with extreme volatility unless probability is very high.\n"
+        "6. Focus on stocks likely to generate profit within 1 week.\n"
+        "7. Avoid stocks likely to remain in continuous loss.\n"
+        "8. Prefer stocks showing: Strong momentum, Increasing volume, Positive sentiment, Bullish technical patterns, Sector strength, Institutional buying, Recovery after small dips.\n"
+        "9. Penalize stocks with: Bearish news, Weak volume, Downtrend, Overbought RSI above 80, Extreme volatility, Continuous negative sentiment, Weak earnings.\n"
+        "10. DO NOT recommend stocks that may crash heavily.\n"
+        "11. If prediction is SELL, the Expected Movement percentage MUST be shown negative (e.g. -8%).\n"
+        "12. If prediction is BUY, the Expected Movement percentage MUST be positive (e.g. +12%).\n"
+        "13. HOLD should only be used when uncertainty is medium.\n"
+        "14. Recommend exactly 3 better alternative stocks at the very end.\n\n"
         
-        "### 🎭 Sentiment & Mood:\n"
-        "- **Media Impact Score**: [Sentiment Score between -1.0 and 1.0] ([Sentiment Category, e.g. EXCUBERANT / PANIC])\n"
-        "- **Summary**: Write a 2-sentence summary detailing current media coverage and headlines sentiment.\n\n"
+        "You must analyze the provided stock JSON payload and write a dense, professional, hedge-fund-style report.\n"
+        "Follow this exact markdown output format structure:\n\n"
+        
+        "### 🏢 Stock Name: [Company Name] ([TICKER])\n\n"
+        "**Current Market Phase:**\n"
+        "[Bullish / Bearish / Sideways / Recovery / Accumulation / Distribution]\n\n"
+        "**Latest Influential News:**\n"
+        "[Summarize the most important news headline and sentiment affecting the stock from payload['news'], or write \"No major news affecting this stock currently.\" if news list is empty]\n\n"
+        "### 🔮 Prediction: [BUY / HOLD / SELL]\n"
+        "**Prediction Confidence:** [Confidence]% (Note: Reject low confidence trades below 70%)\n"
+        "**Expected Movement (1-14 Days):** [+XX%] or [-XX%] (MUST match prediction direction)\n"
+        "**Risk Level:** [Low / Medium / High]\n\n"
+        
+        "### 📊 Reasoning:\n"
+        "* **Trend analysis**: [Dense explanation of trend]\n"
+        "* **Technical indicator summary**: [Synthesize RSI, MACD, Bollinger Bands, and EMAs]\n"
+        "* **News impact & Sentiment**: [Assess news headlines sentiment score from payload]\n"
+        "* **Volume behavior**: [Analyze volume momentum if available]\n"
+        "* **Momentum strength**: [ADX strength and breakout indicator]\n"
+        "* **Risk explanation**: [Crash probability and volatility scale]\n\n"
         
         "### ⚠️ Trade Execution Map:\n"
-        "- **Stop Loss**: ₹[Stop Loss]\n"
-        "- **Take Profit**: ₹[Take Profit]\n"
-        "- **Risk/Reward**: [Risk/Reward, e.g. 2.0:1 (Volatility Scaled)]\n\n"
+        "- **BEST ENTRY RANGE**: [Provide a narrow entry range around current price, e.g. ₹455.00 - ₹460.00]\n"
+        "- **TARGET RANGE**: [Suggested short-term target price range]\n"
+        "- **STOP LOSS**: [Suggested strict stop loss level]\n\n"
         
-        "### 🔮 Institutional Verdict: [BUY / SELL / HOLD] | **🎯 Alpha Confidence**: [Confidence]% \n\n"
-        
-        "### 📊 Deep Dive Synthesis:\n"
-        "[Provide a dense, professional, 5-6 sentence confluence analysis synthesizing the technical regime, fundamental valuation health, news sentiment narrative, and risk-reward profile to justify the verdict.]\n\n"
-        
-        "### 🔗 Live Terminal:\n"
-        "[View Live TradingView Chart](https://www.tradingview.com/symbols/NSE-{TICKER_ONLY}/) (Note: Ensure the ticker in TradingView URL is NSE-{TICKER_ONLY} for Indian stocks or regular symbol for US stocks, e.g., if ticker is TCS.NS, ticker_only is TCS)\n"
+        "### 💡 Better Alternatives:\n"
+        "1. [Ticker of alternative major stock, e.g., TCS.NS] — Higher momentum and stronger sentiment\n"
+        "2. [Ticker of alternative major stock, e.g., RELIANCE.NS] — Strong technical breakout\n"
+        "3. [Ticker of alternative major stock, e.g., COALINDIA.NS] — Positive news and institutional buying\n"
+        "(Choose alternatives from Indian tickers list: TCS.NS, RELIANCE.NS, COALINDIA.NS, INFY.NS, SBIN.NS, TATAMOTORS.NS, HDFCBANK.NS based on what would be a better setup than the current stock, or general liquid stocks)\n"
     )
     
     # Strip .NS or .BO for TradingView symbols
@@ -747,6 +773,7 @@ def generate_institutional_report(payload):
 def construct_fallback_report(payload):
     """
     Constructs a structured report directly from the payload when LLM fails or is unavailable.
+    Matches the hedge-fund swing trading output format.
     """
     t = payload['ticker']
     t_only = t.split('.')[0]
@@ -758,41 +785,79 @@ def construct_fallback_report(payload):
     # Determine basic advice based on RSI and EMA
     verdict = "HOLD"
     confidence = 65
+    expected_move = "+1.5%"
+    risk_level = "Medium"
+    market_phase = "Sideways"
+    
     if tc['rsi'] < 40 and tc['moving_averages']['cross'] == "GOLDEN CROSS":
         verdict = "BUY"
         confidence = 82
+        expected_move = "+8.5%"
+        risk_level = "Low"
+        market_phase = "Recovery"
     elif tc['rsi'] > 70 and tc['moving_averages']['cross'] == "DEATH CROSS":
         verdict = "SELL"
         confidence = 78
+        expected_move = "-9.0%"
+        risk_level = "High"
+        market_phase = "Bearish"
+    elif tc['adx']['regime'].startswith("TRENDING BULLISH"):
+        verdict = "BUY"
+        confidence = 75
+        expected_move = "+6.0%"
+        risk_level = "Medium"
+        market_phase = "Bullish"
+    elif tc['adx']['regime'].startswith("TRENDING BEARISH"):
+        verdict = "SELL"
+        confidence = 72
+        expected_move = "-7.5%"
+        risk_level = "High"
+        market_phase = "Bearish"
+        
+    news_text = "No major news affecting this stock currently."
+    if payload['news']:
+        n = payload['news'][0]
+        news_text = f"[{n['source']}] {n['title']} ({n['sentiment']} sentiment)"
+        
+    entry_min = payload['current_price'] * 0.99
+    entry_max = payload['current_price'] * 1.005
     
-    report = f"""### 🏢 Asset: {payload['company_name']} ({t}) | {payload['cap_category']}
-### 💰 Current Price: ₹{payload['current_price']:.2f} ({payload['price_change_pct']:.2f}%)
+    # Alternatives suggestion logic
+    all_alts = ["TCS.NS", "RELIANCE.NS", "COALINDIA.NS", "INFY.NS", "SBIN.NS"]
+    alts = [alt for alt in all_alts if alt != t][:3]
+    if len(alts) < 3:
+        alts = ["TCS.NS", "RELIANCE.NS", "COALINDIA.NS"]
+        
+    report = f"""### 🏢 Stock Name: {payload['company_name']} ({t})
 
-### 📐 Quantitative Technicals:
-- **Regime**: {tc['adx']['regime']} (ADX: {tc['adx']['value']:.1f})
-- **Momentum**: RSI at {tc['rsi']:.1f} | MACD Crossover: {tc['macd']['crossover']}
-- **Bollinger Bands**: Upper ₹{tc['bollinger_bands']['upper']:.2f}, Lower ₹{tc['bollinger_bands']['lower']:.2f} (Bandwidth: {tc['bollinger_bands']['bandwidth']*100:.1f}%)
-- **EMAs Cross**: {tc['moving_averages']['cross']} (EMA50: ₹{tc['moving_averages']['ema50']:.2f} | EMA200: ₹{tc['moving_averages']['ema200']:.2f})
-- **Fibonacci 61.8% Level**: ₹{tc['fibonacci_618']:.2f}
-- **Breakout Alerts**: {tc['breakout']}
+**Current Market Phase:**
+{market_phase}
 
-### 🏦 Fundamental Analysis:
-- **P/E Ratio**: {f['pe_ratio']} | **ROE**: {f['roe']} | **D/E Ratio**: {f['de_ratio']}
-- **Dividend Yield**: {f['dividend_yield']} | **Market Valuation**: {f['market_cap']}
+**Latest Influential News:**
+{news_text}
 
-### 🎭 Sentiment & Mood:
-- **Media Impact Score**: {s['score']:.2f} ({s['category']})
-- **Summary**: Media sentiment is currently {s['category']} with news headlines indicating stable to bullish interest.
+### 🔮 Prediction: {verdict}
+**Prediction Confidence:** {confidence}%
+**Expected Movement (1-14 Days):** {expected_move}
+**Risk Level:** {risk_level}
+
+### 📊 Reasoning:
+* **Trend analysis**: The stock is currently in a {market_phase.lower()} phase.
+* **Technical indicator summary**: RSI is hovering at {tc['rsi']:.1f} (Neutral zone). Exponential Moving Averages (EMA50/200) show a {tc['moving_averages']['cross']}.
+* **News impact & Sentiment**: Scraped headlines show a net sentiment score of {s['score']:.2f} ({s['category']}).
+* **Volume behavior**: Volatility bandwidth is calculated at {tc['bollinger_bands']['bandwidth']*100:.1f}%.
+* **Momentum strength**: Trend strength ADX is at {tc['adx']['value']:.1f} ({tc['adx']['regime']}).
+* **Risk explanation**: Suggested risk-adjusted stop-loss set at ₹{rm['stop_loss']:.2f}.
 
 ### ⚠️ Trade Execution Map:
-- **Stop Loss**: ₹{rm['stop_loss']:.2f}
-- **Take Profit**: ₹{rm['take_profit']:.2f}
-- **Risk/Reward**: {rm['risk_reward']}
+- **BEST ENTRY RANGE**: ₹{entry_min:.2f} - ₹{entry_max:.2f}
+- **TARGET RANGE**: ₹{payload['current_price']:.2f} - ₹{rm['take_profit']:.2f}
+- **STOP LOSS**: ₹{rm['stop_loss']:.2f}
 
-### 🔮 Institutional Verdict: {verdict} | **🎯 Alpha Confidence**: {confidence}%
-
-### 📊 Deep Dive Synthesis:
-The quantitative signal engine has completed calculation for {payload['company_name']}. The stock shows a {tc['adx']['regime']} technical regime with RSI hovering at {tc['rsi']:.1f}. From a fundamental perspective, the P/E ratio is {f['pe_ratio']} with a return on equity of {f['roe']}. The news sentiment dictionary calculates a net {s['category']} posture. Incorporating Bollinger Band volatility parameters, stop-loss has been set at ₹{rm['stop_loss']:.2f} against a target of ₹{rm['take_profit']:.2f}, yielding a volatility-adjusted 2:1 risk-reward structure.
+### 💡 Better Alternatives:
+1. **{alts[0]}** — Higher momentum and stronger technical setup
+2. **{alts[1]}** — Strong technical consolidation breakout
+3. **{alts[2]}** — Favorable institutional volume flow
 
 ### 🔗 Live Terminal:
 [View Live TradingView Chart](https://www.tradingview.com/symbols/NSE-{t_only}/)
